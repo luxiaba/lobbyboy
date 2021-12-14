@@ -153,6 +153,7 @@ bill_time_unit = "0"
 
 [provider.vultr]
 load_module = "lobbyboy.contrib.provider.vultr::VultrProvider"
+enable = true
 min_life_to_live = "1h"
 bill_time_unit = "1h"
 

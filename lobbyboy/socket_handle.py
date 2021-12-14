@@ -1,36 +1,33 @@
-from typing import OrderedDict, Tuple, Optional
-
+import logging
 import os
+import select
 import socket
 import threading
-import select
-import logging
-from io import StringIO
 from binascii import hexlify
-from typing import Dict
-
+from io import StringIO
 from subprocess import Popen
+from typing import Dict, Optional, OrderedDict, Tuple
 
 import paramiko
 from paramiko.channel import Channel
 from paramiko.transport import Transport
 
+from lobbyboy import __version__
+from lobbyboy.config import LBConfig, LBServerMeta, load_local_servers, update_local_servers
+from lobbyboy.exceptions import NoProviderException, ProviderException, UserCancelException
+from lobbyboy.provider import BaseProvider
 from lobbyboy.server import Server
 from lobbyboy.server_killer import ServerKiller
 from lobbyboy.utils import (
-    available_server_db_lock,
-    active_session_lock,
     DoGSSAPIKeyExchange,
-    send_to_channel,
-    active_session,
     KeyTypeSupport,
+    active_session,
+    active_session_lock,
+    available_server_db_lock,
     choose_option,
     confirm_ssh_key_pair,
+    send_to_channel,
 )
-from lobbyboy.config import LBConfig, LBServerMeta, update_local_servers, load_local_servers
-from lobbyboy.exceptions import UserCancelException, ProviderException, NoProviderException
-from lobbyboy.provider import BaseProvider
-from lobbyboy import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +124,7 @@ class SocketHandlerThread(threading.Thread):
     def prepare_server(self, t: Transport, key_type: KeyTypeSupport = KeyTypeSupport.RSA) -> Optional[Server]:
         try:
             t.load_server_moduli()
-        except:  # noqa
+        except:  # noqa: E722
             logger.error("(Failed to load moduli -- gex will be unsupported.)")
             raise
 
@@ -256,6 +253,6 @@ class SocketHandlerThread(threading.Thread):
                 f"LobbyBoy: SSH to remote server {lb_server.server_name} closed.",
             )
             self.cleanup(t, meta=lb_server, check_destroy=True)
-        except Exception:  # noqa
+        except Exception:  # noqa: E722
             logger.critical("*** Socket thread error.", exc_info=True)
             self.cleanup(t)

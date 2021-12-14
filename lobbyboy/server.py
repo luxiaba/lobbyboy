@@ -12,7 +12,7 @@ from binascii import hexlify
 import paramiko
 
 from lobbyboy.config import LBConfig
-from lobbyboy.exceptions import UnsupportedPrivateKeyTypeException, NoTTYException
+from lobbyboy.exceptions import NoTTYException, UnsupportedPrivateKeyTypeException
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class Server(paramiko.ServerInterface):
             logger.info(f"accept auth {user} with key {k}")
         return success
 
-    def check_auth_publickey(self, username: str, key: paramiko.PKey):  # noqa
+    def check_auth_publickey(self, username: str, key: paramiko.PKey):
         use_key_type = key.get_name()
         logger.info(f"try to auth {username} with key type {use_key_type}...")
         config = self.config.reload()

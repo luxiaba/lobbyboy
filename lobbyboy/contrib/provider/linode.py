@@ -1,18 +1,18 @@
-import os
 import logging
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Tuple
 
-from linode_api4 import LinodeClient, Region, Type, Image, Instance
+from linode_api4 import Image, Instance, LinodeClient, Region, Type
 from paramiko.channel import Channel
 
-from lobbyboy.provider import BaseProvider
-from lobbyboy.utils import send_to_channel, port_is_open, choose_option
 from lobbyboy.config import LBConfigProvider, LBServerMeta
+from lobbyboy.provider import BaseProvider
+from lobbyboy.utils import choose_option, port_is_open, send_to_channel
 
 logger = logging.getLogger(__name__)
-ENV_TOKEN_NAME = "LINODE_TOKEN"
+ENV_TOKEN_NAME = "LINODE_TOKEN"  # nosec: false B105(hardcoded_password_string) by bandit
 
 
 @dataclass
@@ -70,9 +70,9 @@ class LinodeProvider(BaseProvider):
 
         # save server info to local first
         # TODO `_serialize` information le less
-        instance_info = instance._serialize()  # noqa
+        instance_info = instance._serialize()  # noqa: W0212
         instance_info["id"] = instance.id
-        self.save_raw_server(instance_info, workspace)  # noqa
+        self.save_raw_server(instance_info, workspace)
 
         # wait for server to startup(check port is alive or not)
         send_to_channel(channel, "Waiting for server to boot...")

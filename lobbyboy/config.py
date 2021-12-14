@@ -2,15 +2,17 @@ import json
 import logging
 import time
 from collections import OrderedDict
-from dataclasses import dataclass, field, fields, asdict
+from dataclasses import asdict, dataclass, field, fields
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Dict, List, Tuple, OrderedDict as typeOrderedDict, Optional, Type, Any
+from typing import Any, Dict, List, Optional
+from typing import OrderedDict as typeOrderedDict
+from typing import Tuple, Type
 
 import toml
 
 from lobbyboy.exceptions import InvalidConfigException
-from lobbyboy.utils import lb_dict_factory, confirm_dc_type, get_cls
+from lobbyboy.utils import confirm_dc_type, get_cls, lb_dict_factory
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +98,7 @@ class LBConfig:
         """Load config from file."""
         logger.debug(f"Loading LB configs from {str(config_file)}.")
 
-        raw_config: Dict = toml.load(config_file)  # noqa
+        raw_config: Dict = toml.load(config_file)  # type: ignore
 
         # update it from config file
         config_file_file = {
@@ -123,6 +125,7 @@ class LBConfig:
         """
         if self.data_dir is None:
             return False, "missing required config: please check 'data_dir' in your config file."
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         # TODO, config validator
         return True, None
 
@@ -194,6 +197,6 @@ def update_local_servers(
         local_servers.pop(server.server_name, None)
 
     with open(servers_db_path, "w+") as f:
-        c = [asdict(i, dict_factory=lb_dict_factory) for i in local_servers.values()]  # noqa
+        c = [asdict(i, dict_factory=lb_dict_factory) for i in local_servers.values()]  # type: ignore
         f.write(json.dumps(c))
     return local_servers

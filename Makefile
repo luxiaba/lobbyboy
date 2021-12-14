@@ -1,3 +1,3 @@
 lint:
-	poetry run flake8 .
-	poetry run black .
+	poetry run pre-commit install
+	poetry run pre-commit run --all-file

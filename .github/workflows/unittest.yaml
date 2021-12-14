@@ -7,8 +7,25 @@ on:
       - main
 
 jobs:
+  lint:
+    name: Pre-Commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+          architecture: 'x64'
+      - name: PreCommit
+        uses: pre-commit/action@v2.0.3
+        with:
+          extra_args: --all-files
+
   test:
     name: Pytest
+    needs: [lint]
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -47,39 +64,3 @@ jobs:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
-  lint:
-    name: flake8 & black
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-          architecture: 'x64'
-      - name: Cache venv
-        uses: actions/cache@v2
-        with:
-          path: venv
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: lintenv-v2
-      - name: Install Dependencies
-        run: |
-          python3 -m venv venv
-          . venv/bin/activate
-          pip install -U pip flake8 black
-      - name: Flake8 test
-        run: |
-          . venv/bin/activate
-          flake8 .
-      - name: Black test
-        run: |
-          . venv/bin/activate
-          black --check .
-  spellcheck:
-    name: spellcheck
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: codespell-project/actions-codespell@master

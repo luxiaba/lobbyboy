@@ -1,22 +1,21 @@
 import importlib
+import logging
 import os
 import re
-import logging
 import socket
 import threading
-from datetime import timedelta, datetime, date
+from datetime import date, datetime, timedelta
 from enum import Enum, unique
 from io import StringIO
 from pathlib import Path
-from typing import List, Dict, Tuple, Callable, Union, Any, Type, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import paramiko
 from paramiko.channel import Channel
 
-from lobbyboy.exceptions import UnsupportedPrivateKeyTypeException, UserCancelException, TimeStrParseTypeException
+from lobbyboy.exceptions import TimeStrParseTypeException, UnsupportedPrivateKeyTypeException, UserCancelException
 
 logger = logging.getLogger(__name__)
-
 
 DoGSSAPIKeyExchange = True
 active_session: Dict[str, List[paramiko.Transport]] = {}
@@ -152,7 +151,7 @@ def choose_option(
             send_to_channel(channel, f"You selected: {options[num_selected]}")
             return num_selected
         raise Exception(f"user choose {result} for option {option_prompt}, but it's out of range")
-    except Exception:  # noqa
+    except Exception:  # noqa: E722
         logger.error(f"user choose {result} for option {option_prompt} invalid, re-choose...")
         send_to_channel(channel, f"unknown choice, please choose again [{0}-{len(options) - 1}]")
         return choose_option(channel, options, option_prompt=option_prompt, ask_prompt=ask_prompt)
@@ -277,6 +276,15 @@ def try_load_key_from_file(
 
 
 def get_cls(cls_path: str = ""):
+    """
+    Get a class through the module_path and classname connected by "::".
+
+    Args:
+        cls_path: a string connected by "::" to indicate the module path and class name.
+
+    Returns:
+        A class
+    """
     source = cls_path.split("::", maxsplit=1)
     if len(source) != 2:
         return
